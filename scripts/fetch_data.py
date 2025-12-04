@@ -145,9 +145,9 @@ def fetch_coinbase_data(days: int = 365, product_suffix: str = "-USD"):
             print(f"📦 Using cached Coinbase data ({age_hours:.2f}h old) → {CACHE_FILE}")
             return df_cache
 
-        # fetch latest ~3 days to be safe and append only new rows
+        # fetch latest day to be safe and append only new rows
         print(f"♻️ Cache stale ({age_hours:.2f}h). Fetching recent data since {last_ts} ...")
-        new_raw = fetch_from_coinbase(days=3, product_suffix=product_suffix)
+        new_raw = fetch_from_coinbase(days=1, product_suffix=product_suffix)
         new_raw = new_raw[new_raw["timestamp"] > last_ts]
 
         if new_raw.empty:
