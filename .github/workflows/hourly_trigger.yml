@@ -2,8 +2,8 @@ name: Hourly Signal Trigger
 
 on:
   schedule:
-    - cron: "0 * * * *"  # runs once at the top of every hour
-  workflow_dispatch:     # allows manual trigger
+    - cron: "4 * * * *"   # run 4 minutes after the hour
+  workflow_dispatch:
 
 jobs:
   run-mamo:
