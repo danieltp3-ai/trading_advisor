@@ -1,0 +1,17 @@
+name: Hourly Signal Trigger
+
+on:
+  schedule:
+    - cron: "0 * * * *"  # runs once at the top of every hour
+  workflow_dispatch:     # allows manual trigger
+
+jobs:
+  run-mamo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger PythonAnywhere
+        run: |
+          echo "Pinging PythonAnywhere..."
+          curl -sS "$PA_URL"
+        env:
+          PA_URL: ${{ secrets.PA_URL }}
