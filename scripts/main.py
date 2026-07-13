@@ -10,6 +10,7 @@ from features import compute_features
 from model import train_or_load_model
 from backtest import backtest_with_trade_log_and_accuracy
 from alert import send_sms_via_email, send_daily_summary
+from discord_alert import send_discord_alert
 from utils.signal_logic import _dynamic_buy_threshold, _trend_direction
 from config import LOG_PATH, MODEL_PATH
 from dotenv import load_dotenv  # install with: pip install python-dotenv
@@ -92,7 +93,7 @@ def generate_latest_signal_and_backtest(days_window=60):
     df_log.to_csv(LOG_PATH, index=False)
 
     # Existing call
-    send_sms_via_email(signal_str, price, ts, accuracy, final_equity)
+    send_discord_alert(signal_str, price, win_rate, final_equity)
 
     # New addition (runs only at noon)
     send_daily_summary(final_equity, len(trades_df), win_rate)
@@ -127,6 +128,7 @@ def generate_latest_signal_and_backtest(days_window=60):
     # Save the figure to files instead of showing
     full_chart_path = "/Users/dpowers01/trading_advisor/logs/mamo_full_backtest.png"
     last7_chart_path = "/Users/dpowers01/trading_advisor/logs/mamo_last7days.png"
+    last24_chart_path = "/Users/dpowers01/trading_advisor/logs/mamo_last24hours.png"
 
     # Save full duration plot separately
     fig_full, ax_full = plt.subplots(figsize=(12,6))
@@ -156,6 +158,48 @@ def generate_latest_signal_and_backtest(days_window=60):
     fig_week.tight_layout()
     fig_week.savefig(last7_chart_path)
     plt.close(fig_week)
+
+    # -----------------------------
+    # Save last 24 hours plot
+    # -----------------------------
+    last_24h = df_bt[df_bt["timestamp"] >= df_bt["timestamp"].max() - pd.Timedelta(hours=24)]
+
+    if not last_24h.empty:
+        fig_day, ax_day = plt.subplots(figsize=(12, 6))
+
+    ax_day.plot(
+        last_24h["timestamp"],
+        last_24h["equity"],
+        linewidth=2,
+        label="Equity Curve",
+        color="tab:blue"
+    )
+    ax_day.set_ylabel("Equity ($)", color="tab:blue")
+    ax_day.set_xlabel("Hour")
+
+    ax_day2 = ax_day.twinx()
+    ax_day2.plot(
+        last_24h["timestamp"],
+        last_24h["close"],
+        linewidth=2,
+        alpha=0.7,
+        label="Coin Price",
+        color="tab:orange"
+    )
+    ax_day2.set_ylabel("Price (USD)", color="tab:orange")
+
+    # 🔑 Force hourly ticks (24 ticks)
+    ax_day.xaxis.set_major_locator(mdates.HourLocator(interval=1))
+    ax_day.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+
+    ax_day.grid(True, linestyle="--", alpha=0.5)
+    ax_day.set_title("MAMO Model Performance — Last 24 Hours (Hourly View)")
+
+    fig_day.autofmt_xdate()
+    fig_day.tight_layout()
+
+    fig_day.savefig(last24_chart_path)
+    plt.close(fig_day)
 
     print(f"✅ Saved full backtest chart → {full_chart_path}")
     print(f"✅ Saved last 7 days chart → {last7_chart_path}")

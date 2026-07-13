@@ -3,6 +3,7 @@ import numpy as np
 from config import TRADE_FEE, TAKE_PROFIT, STOP_LOSS
 from config import BASE_BUY_CONF, ATR_SCALE, MAX_CONF_ADJUST, MIN_BUY_CONF, MAX_BUY_CONF, ATR_EXIT_THRESHOLD
 from utils.signal_logic import _dynamic_buy_threshold
+from sentiment.btc_sentiment import get_btc_fng
 
 def backtest_with_trade_log_and_accuracy(df, model, feature_cols,
                                          start_equity=1000.0,
@@ -18,6 +19,9 @@ def backtest_with_trade_log_and_accuracy(df, model, feature_cols,
     df = df.copy()
     df[feature_cols] = df[feature_cols].apply(pd.to_numeric, errors="coerce")
     df = df.dropna().reset_index(drop=True)
+
+    ENABLE_SENTIMENT_GATE = True
+    btc_sentiment = get_btc_fng()
 
     # If an adjusted 'signal' column exists (from live logic), use it for SELL
     # But we'll compute pred and buy_conf inside backtest to apply ATR gating consistently.
@@ -62,6 +66,7 @@ def backtest_with_trade_log_and_accuracy(df, model, feature_cols,
     trades = []
     equity_curve = []
 
+
     for idx, row in df.iterrows():
         ts = row["timestamp"]
         price = float(row["close"])
@@ -69,6 +74,9 @@ def backtest_with_trade_log_and_accuracy(df, model, feature_cols,
         raw_signal = int(row["pred_signal"])
         buy_conf = float(row["buy_conf"]) if not np.isnan(row["buy_conf"]) else 1.0
         atr_pct = float(row["atr_pct"]) if not np.isnan(row["atr_pct"]) else 0.0
+
+        #if ENABLE_SENTIMENT_GATE:
+        #    raw_signal = apply_sentiment_gate(raw_signal, btc_sentiment)
 
         # compute dynamic buy threshold (only relevant to LONG buys)
         dynamic_thr = _dynamic_buy_threshold(atr_pct)

@@ -4,6 +4,8 @@ import pandas as pd
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
 from config import COIN_ID, CACHE_FILE, CACHE_TTL_HOURS
+from utils.candle_utils import fetch_and_clean_candles
+
 
 # Coinbase Exchange candles endpoint
 COINBASE_CANDLES_URL = "https://api.exchange.coinbase.com/products/{product_id}/candles"
@@ -128,50 +130,52 @@ def fetch_from_coinbase(days: int = 365, product_suffix: str = "-USD"):
 
 def fetch_coinbase_data(days: int = 365, product_suffix: str = "-USD"):
     """
-    Cached fetcher for Coinbase OHLCV. Respects CACHE_TTL_HOURS and appends new hourly rows.
-    Returns DataFrame with columns: timestamp (UTC-aware), open, high, low, close, volume
+    Cached fetcher for Coinbase OHLCV.
+    Ensures:
+      - closed candles only
+      - no missing hours
+      - no intrabar churn
     """
     now = pd.Timestamp.utcnow().tz_convert("UTC")
 
-    # If cache exists and not stale, return it
+    # -------------------------------
+    # Cache exists
+    # -------------------------------
     if Path(CACHE_FILE).exists():
         df_cache = pd.read_parquet(CACHE_FILE)
-        # ensure tz-aware timestamps
         df_cache["timestamp"] = pd.to_datetime(df_cache["timestamp"], utc=True)
+
         last_ts = df_cache["timestamp"].max()
         age_hours = (now - last_ts).total_seconds() / 3600.0
 
         if age_hours < CACHE_TTL_HOURS:
-            print(f"📦 Using cached Coinbase data ({age_hours:.2f}h old) → {CACHE_FILE}")
+            print(f"📦 Using cached Coinbase data ({age_hours:.2f}h old)")
             return df_cache
 
-        # fetch latest day to be safe and append only new rows
-        print(f"♻️ Cache stale ({age_hours:.2f}h). Fetching recent data since {last_ts} ...")
-        new_raw = fetch_from_coinbase(days=1, product_suffix=product_suffix)
-        new_raw = new_raw[new_raw["timestamp"] > last_ts]
+        print(f"♻️ Cache stale ({age_hours:.2f}h). Fetching recent candles...")
 
-        if new_raw.empty:
-            print("ℹ️ No new rows returned by Coinbase; returning existing cache.")
-            return df_cache
+        # Fetch a buffer (48h is safer than 24h)
+        new_raw = fetch_from_coinbase(days=2, product_suffix=product_suffix)
 
-        combined = pd.concat([df_cache, new_raw], ignore_index=True)
-        combined = combined.drop_duplicates(subset=["timestamp"]).sort_values("timestamp").reset_index(drop=True)
+        # Combine BEFORE cleaning so gaps are handled correctly
+        combined_raw = pd.concat([df_cache, new_raw], ignore_index=True)
+        combined_raw = combined_raw.drop_duplicates(subset=["timestamp"])
+
+        # 🔑 CLEAN + BACKFILL
+        combined = fetch_and_clean_candles(combined_raw)
+
         combined.to_parquet(CACHE_FILE, index=False)
-        print(f"✅ Appended {len(new_raw)} new hourly rows and updated cache at {CACHE_FILE}")
+        print(f"✅ Cache updated → {CACHE_FILE} ({len(combined)} candles)")
         return combined
 
-    # No cache: fetch full history and save
+    # -------------------------------
+    # No cache
+    # -------------------------------
     print("🆕 No cache found — fetching full Coinbase history...")
-    df = fetch_from_coinbase(days=days, product_suffix=product_suffix)
+    raw = fetch_from_coinbase(days=days, product_suffix=product_suffix)
 
-    # ensure hourly spacing (resample if necessary) - force 1H candles using last price and sum volume
-    df = df.set_index("timestamp").resample("1h").agg({
-        "open": "first",
-        "high": "max",
-        "low": "min",
-        "close": "last",
-        "volume": "sum"
-    }).dropna().reset_index()
+    # 🔑 CLEAN + BACKFILL
+    df = fetch_and_clean_candles(raw)
 
     df.to_parquet(CACHE_FILE, index=False)
     print(f"✅ Cached {len(df)} hourly candles → {CACHE_FILE}")
