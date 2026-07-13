@@ -80162,3 +80162,129 @@ Traceback (most recent call last):
   File "/Users/dpowers01/trading_advisor/scripts/backtest.py", line 6, in <module>
     from sentiment.btc_sentiment import fetch_historical_btc_sentiment, sentiment_conf_penalty
 ImportError: cannot import name 'sentiment_conf_penalty' from 'sentiment.btc_sentiment' (/Users/dpowers01/trading_advisor/scripts/sentiment/btc_sentiment.py)
+Traceback (most recent call last):
+  File "/Users/dpowers01/trading_advisor/scripts/main.py", line 12, in <module>
+    from backtest import backtest_with_trade_log_and_accuracy
+  File "/Users/dpowers01/trading_advisor/scripts/backtest.py", line 6, in <module>
+    from sentiment.btc_sentiment import fetch_historical_btc_sentiment, sentiment_conf_penalty
+ImportError: cannot import name 'sentiment_conf_penalty' from 'sentiment.btc_sentiment' (/Users/dpowers01/trading_advisor/scripts/sentiment/btc_sentiment.py)
+Traceback (most recent call last):
+  File "/Users/dpowers01/trading_advisor/scripts/main.py", line 12, in <module>
+    from backtest import backtest_with_trade_log_and_accuracy
+  File "/Users/dpowers01/trading_advisor/scripts/backtest.py", line 6, in <module>
+    from sentiment.btc_sentiment import fetch_historical_btc_sentiment, sentiment_conf_penalty
+ImportError: cannot import name 'sentiment_conf_penalty' from 'sentiment.btc_sentiment' (/Users/dpowers01/trading_advisor/scripts/sentiment/btc_sentiment.py)
+Traceback (most recent call last):
+  File "/Users/dpowers01/trading_advisor/scripts/main.py", line 12, in <module>
+    from backtest import backtest_with_trade_log_and_accuracy
+  File "/Users/dpowers01/trading_advisor/scripts/backtest.py", line 6, in <module>
+    from sentiment.btc_sentiment import fetch_historical_btc_sentiment, sentiment_conf_penalty
+ImportError: cannot import name 'sentiment_conf_penalty' from 'sentiment.btc_sentiment' (/Users/dpowers01/trading_advisor/scripts/sentiment/btc_sentiment.py)
+Traceback (most recent call last):
+  File "/Users/dpowers01/trading_advisor/scripts/main.py", line 11, in <module>
+    from backtest import backtest_with_trade_log_and_accuracy
+  File "/Users/dpowers01/trading_advisor/scripts/backtest.py", line 6, in <module>
+    from sentiment.btc_sentiment import fetch_historical_btc_sentiment, sentiment_conf_penalty
+ImportError: cannot import name 'sentiment_conf_penalty' from 'sentiment.btc_sentiment' (/Users/dpowers01/trading_advisor/scripts/sentiment/btc_sentiment.py)
+Traceback (most recent call last):
+  File "/Users/dpowers01/trading_advisor/scripts/main.py", line 11, in <module>
+    from backtest import backtest_with_trade_log_and_accuracy
+  File "/Users/dpowers01/trading_advisor/scripts/backtest.py", line 6, in <module>
+    from sentiment.btc_sentiment import fetch_historical_btc_sentiment, sentiment_conf_penalty
+ImportError: cannot import name 'sentiment_conf_penalty' from 'sentiment.btc_sentiment' (/Users/dpowers01/trading_advisor/scripts/sentiment/btc_sentiment.py)
+Traceback (most recent call last):
+  File "/Users/dpowers01/trading_advisor/scripts/main.py", line 11, in <module>
+    from backtest import backtest_with_trade_log_and_accuracy
+  File "/Users/dpowers01/trading_advisor/scripts/backtest.py", line 6, in <module>
+    from sentiment.btc_sentiment import fetch_historical_btc_sentiment, sentiment_conf_penalty
+ImportError: cannot import name 'sentiment_conf_penalty' from 'sentiment.btc_sentiment' (/Users/dpowers01/trading_advisor/scripts/sentiment/btc_sentiment.py)
+Traceback (most recent call last):
+  File "/Users/dpowers01/trading_advisor/scripts/main.py", line 11, in <module>
+    from backtest import backtest_with_trade_log_and_accuracy
+  File "/Users/dpowers01/trading_advisor/scripts/backtest.py", line 6, in <module>
+    from sentiment.btc_sentiment import fetch_historical_btc_sentiment, sentiment_conf_penalty
+ImportError: cannot import name 'sentiment_conf_penalty' from 'sentiment.btc_sentiment' (/Users/dpowers01/trading_advisor/scripts/sentiment/btc_sentiment.py)
+Traceback (most recent call last):
+  File "/Users/dpowers01/trading_advisor/scripts/main.py", line 11, in <module>
+    from backtest import backtest_with_trade_log_and_accuracy
+  File "/Users/dpowers01/trading_advisor/scripts/backtest.py", line 6, in <module>
+    from sentiment.btc_sentiment import fetch_historical_btc_sentiment, sentiment_conf_penalty
+ImportError: cannot import name 'sentiment_conf_penalty' from 'sentiment.btc_sentiment' (/Users/dpowers01/trading_advisor/scripts/sentiment/btc_sentiment.py)
+Traceback (most recent call last):
+  File "/Users/dpowers01/trading_advisor/scripts/main.py", line 11, in <module>
+    from backtest import backtest_with_trade_log_and_accuracy
+  File "/Users/dpowers01/trading_advisor/scripts/backtest.py", line 6, in <module>
+    from sentiment.btc_sentiment import get_btc_sentiment
+ImportError: cannot import name 'get_btc_sentiment' from 'sentiment.btc_sentiment' (/Users/dpowers01/trading_advisor/scripts/sentiment/btc_sentiment.py)
+Traceback (most recent call last):
+  File "/Users/dpowers01/trading_advisor/scripts/main.py", line 11, in <module>
+    from backtest import backtest_with_trade_log_and_accuracy
+  File "/Users/dpowers01/trading_advisor/scripts/backtest.py", line 6, in <module>
+    from sentiment.btc_sentiment import get_btc_sentiment
+ImportError: cannot import name 'get_btc_sentiment' from 'sentiment.btc_sentiment' (/Users/dpowers01/trading_advisor/scripts/sentiment/btc_sentiment.py)
+Traceback (most recent call last):
+  File "/Users/dpowers01/trading_advisor/scripts/main.py", line 11, in <module>
+    from backtest import backtest_with_trade_log_and_accuracy
+  File "/Users/dpowers01/trading_advisor/scripts/backtest.py", line 6, in <module>
+    from sentiment.btc_sentiment import get_btc_sentiment
+ImportError: cannot import name 'get_btc_sentiment' from 'sentiment.btc_sentiment' (/Users/dpowers01/trading_advisor/scripts/sentiment/btc_sentiment.py)
+Traceback (most recent call last):
+  File "/Users/dpowers01/trading_advisor/scripts/main.py", line 11, in <module>
+    from backtest import backtest_with_trade_log_and_accuracy
+  File "/Users/dpowers01/trading_advisor/scripts/backtest.py", line 6, in <module>
+    from sentiment.btc_sentiment import get_btc_sentiment
+ImportError: cannot import name 'get_btc_sentiment' from 'sentiment.btc_sentiment' (/Users/dpowers01/trading_advisor/scripts/sentiment/btc_sentiment.py)
+Traceback (most recent call last):
+  File "/Users/dpowers01/trading_advisor/scripts/main.py", line 11, in <module>
+    from backtest import backtest_with_trade_log_and_accuracy
+  File "/Users/dpowers01/trading_advisor/scripts/backtest.py", line 6, in <module>
+    from sentiment.btc_sentiment import get_btc_sentiment
+ImportError: cannot import name 'get_btc_sentiment' from 'sentiment.btc_sentiment' (/Users/dpowers01/trading_advisor/scripts/sentiment/btc_sentiment.py)
+Traceback (most recent call last):
+  File "/Users/dpowers01/trading_advisor/scripts/main.py", line 11, in <module>
+    from backtest import backtest_with_trade_log_and_accuracy
+  File "/Users/dpowers01/trading_advisor/scripts/backtest.py", line 6, in <module>
+    from sentiment.btc_sentiment import get_btc_sentiment
+ImportError: cannot import name 'get_btc_sentiment' from 'sentiment.btc_sentiment' (/Users/dpowers01/trading_advisor/scripts/sentiment/btc_sentiment.py)
+Traceback (most recent call last):
+  File "/Users/dpowers01/trading_advisor/scripts/main.py", line 11, in <module>
+    from backtest import backtest_with_trade_log_and_accuracy
+  File "/Users/dpowers01/trading_advisor/scripts/backtest.py", line 6, in <module>
+    from sentiment.btc_sentiment import get_btc_sentiment
+ImportError: cannot import name 'get_btc_sentiment' from 'sentiment.btc_sentiment' (/Users/dpowers01/trading_advisor/scripts/sentiment/btc_sentiment.py)
+Traceback (most recent call last):
+  File "/Users/dpowers01/trading_advisor/scripts/main.py", line 11, in <module>
+    from backtest import backtest_with_trade_log_and_accuracy
+  File "/Users/dpowers01/trading_advisor/scripts/backtest.py", line 6, in <module>
+    from sentiment.btc_sentiment import get_btc_sentiment
+ImportError: cannot import name 'get_btc_sentiment' from 'sentiment.btc_sentiment' (/Users/dpowers01/trading_advisor/scripts/sentiment/btc_sentiment.py)
+Traceback (most recent call last):
+  File "/Users/dpowers01/trading_advisor/scripts/main.py", line 11, in <module>
+    from backtest import backtest_with_trade_log_and_accuracy
+  File "/Users/dpowers01/trading_advisor/scripts/backtest.py", line 6, in <module>
+    from sentiment.btc_sentiment import get_btc_sentiment
+ImportError: cannot import name 'get_btc_sentiment' from 'sentiment.btc_sentiment' (/Users/dpowers01/trading_advisor/scripts/sentiment/btc_sentiment.py)
+/Users/dpowers01/trading_advisor/scripts/utils/candle_utils.py:18: FutureWarning: 'H' is deprecated and will be removed in a future version, please use 'h' instead.
+  now_hour = pd.Timestamp.utcnow().floor("H")
+/Users/dpowers01/trading_advisor/scripts/utils/candle_utils.py:24: FutureWarning: 'H' is deprecated and will be removed in a future version, please use 'h' instead.
+  df = df.asfreq("1H")
+/Users/dpowers01/trading_advisor/scripts/utils/candle_utils.py:18: FutureWarning: 'H' is deprecated and will be removed in a future version, please use 'h' instead.
+  now_hour = pd.Timestamp.utcnow().floor("H")
+/Users/dpowers01/trading_advisor/scripts/utils/candle_utils.py:24: FutureWarning: 'H' is deprecated and will be removed in a future version, please use 'h' instead.
+  df = df.asfreq("1H")
+Traceback (most recent call last):
+  File "/Users/dpowers01/trading_advisor/scripts/main.py", line 248, in <module>
+    df_bt, trades_df, final_equity = generate_latest_signal_and_backtest()
+  File "/Users/dpowers01/trading_advisor/scripts/main.py", line 192, in generate_latest_signal_and_backtest
+    ax_day.xaxis.set_major_locator(mdates.HourLocator(interval=1))
+NameError: name 'mdates' is not defined
+/Users/dpowers01/trading_advisor/scripts/utils/candle_utils.py:18: FutureWarning: 'H' is deprecated and will be removed in a future version, please use 'h' instead.
+  now_hour = pd.Timestamp.utcnow().floor("H")
+/Users/dpowers01/trading_advisor/scripts/utils/candle_utils.py:24: FutureWarning: 'H' is deprecated and will be removed in a future version, please use 'h' instead.
+  df = df.asfreq("1H")
+Traceback (most recent call last):
+  File "/Users/dpowers01/trading_advisor/scripts/main.py", line 248, in <module>
+    df_bt, trades_df, final_equity = generate_latest_signal_and_backtest()
+  File "/Users/dpowers01/trading_advisor/scripts/main.py", line 192, in generate_latest_signal_and_backtest
+    ax_day.xaxis.set_major_locator(mdates.HourLocator(interval=1))
+NameError: name 'mdates' is not defined

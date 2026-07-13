@@ -2,7 +2,6 @@ import pandas as pd
 import matplotlib
 matplotlib.use("Agg")  # Render to files instead of GUI windows
 import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
 import os
 import datetime
 import numpy as np
@@ -11,10 +10,10 @@ from features import compute_features
 from model import train_or_load_model
 from backtest import backtest_with_trade_log_and_accuracy
 from alert import send_sms_via_email, send_daily_summary
+from discord_alert import send_discord_alert
 from utils.signal_logic import _dynamic_buy_threshold, _trend_direction
 from config import LOG_PATH, MODEL_PATH
 from dotenv import load_dotenv  # install with: pip install python-dotenv
-from sentiment.btc_sentiment import get_btc_fng, sentiment_conf_penalty
 import subprocess
 from pathlib import Path
 
@@ -52,20 +51,14 @@ def generate_latest_signal_and_backtest(days_window=60):
     # Dynamic threshold
     dynamic_thr = _dynamic_buy_threshold(atr_pct)
 
-    # adjust threshold based on sentiment
-    btc_sentiment_fng_int = get_btc_fng()
-    sentiment_penalty = sentiment_conf_penalty(btc_sentiment_fng_int)
-    adjusted_thr = dynamic_thr + sentiment_penalty
-    adjusted_thr = min(max(adjusted_thr, 0.0), 0.95)
-
     # --- Generate Hourly Trading Signals ---
     signal = 0
     latest_conf = df["buy_conf"].iloc[-1]
     latest_trend = df["trend"].iloc[-1]
 
-    if latest_conf >= adjusted_thr and latest_trend == 1:
+    if latest_conf >= dynamic_thr and latest_trend == 1:
         signal = 1  # Long entry or maintain long
-    elif latest_conf <= (1 - adjusted_thr) and latest_trend == -1:
+    elif latest_conf <= (1 - dynamic_thr) and latest_trend == -1:
         signal = -1  # Short entry or maintain short
     else:
         signal = 0  # Stay flat if uncertain / no edge
@@ -74,7 +67,7 @@ def generate_latest_signal_and_backtest(days_window=60):
     df.loc[df.index[-1], "signal"] = signal
 
     # Debug print
-    print(f"DEBUG: conf={latest_conf:.3f}, thr={adjusted_thr:.3f}, trend={latest_trend}, signal={signal}")
+    print(f"DEBUG: conf={latest_conf:.3f}, thr={dynamic_thr:.3f}, trend={latest_trend}, signal={signal}")
 
     # Backtest for full window context
     df_bt, final_equity, trades_df, accuracy, winning_trades, win_rate = \
@@ -100,10 +93,10 @@ def generate_latest_signal_and_backtest(days_window=60):
     df_log.to_csv(LOG_PATH, index=False)
 
     # Existing call
-    # send_sms_via_email(signal_str, price, ts, accuracy, final_equity)
+    send_discord_alert(signal_str, price, win_rate, final_equity)
 
     # New addition (runs only at noon)
-    # send_daily_summary(final_equity, len(trades_df), win_rate)
+    send_daily_summary(final_equity, len(trades_df), win_rate)
 
     # Create a figure with two subplots
     fig, axes = plt.subplots(2, 1, figsize=(12, 12), constrained_layout=True)
