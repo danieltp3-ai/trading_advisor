@@ -3084,3 +3084,15 @@ Traceback (most recent call last):
   File "/Users/dpowers01/trading_advisor/scripts/main.py", line 29, in generate_latest_signal_and_backtest
     raise ValueError("❌ WALLET_PRIVATE_KEY not found in environment variables.")
 ValueError: ❌ WALLET_PRIVATE_KEY not found in environment variables.
+Traceback (most recent call last):
+  File "/Users/dpowers01/trading_advisor/scripts/main.py", line 204, in <module>
+    df_bt, trades_df, final_equity = generate_latest_signal_and_backtest()
+  File "/Users/dpowers01/trading_advisor/scripts/main.py", line 29, in generate_latest_signal_and_backtest
+    raise ValueError("❌ WALLET_PRIVATE_KEY not found in environment variables.")
+ValueError: ❌ WALLET_PRIVATE_KEY not found in environment variables.
+Traceback (most recent call last):
+  File "/Users/dpowers01/trading_advisor/scripts/main.py", line 204, in <module>
+    df_bt, trades_df, final_equity = generate_latest_signal_and_backtest()
+  File "/Users/dpowers01/trading_advisor/scripts/main.py", line 29, in generate_latest_signal_and_backtest
+    raise ValueError("❌ WALLET_PRIVATE_KEY not found in environment variables.")
+ValueError: ❌ WALLET_PRIVATE_KEY not found in environment variables.

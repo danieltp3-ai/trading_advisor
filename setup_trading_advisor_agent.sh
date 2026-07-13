@@ -3,7 +3,7 @@ set -e
 
 HOME=/Users/dpowers01
 PROJECT_ROOT="$HOME/trading_advisor"
-PYTHON_BIN="$PROJECT_ROOT/venv/bin/python3"
+PYTHON_BIN="$PROJECT_ROOT/venv/bin/python3.10"
 PLIST_PATH="$HOME/Library/LaunchAgents/com.trading_advisor.hourly.plist"
 WATCHDOG_PATH="$HOME/Library/LaunchAgents/com.dpowers.trading_advisor.watchdog.plist"
 ENV_FILE="$PROJECT_ROOT/.env"

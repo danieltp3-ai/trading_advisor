@@ -3,6 +3,87 @@ import numpy as np
 from config import TRADE_FEE, TAKE_PROFIT, STOP_LOSS
 from config import BASE_BUY_CONF, ATR_SCALE, MAX_CONF_ADJUST, MIN_BUY_CONF, MAX_BUY_CONF, ATR_EXIT_THRESHOLD
 from utils.signal_logic import _dynamic_buy_threshold
+from sentiment.btc_sentiment import fetch_historical_btc_sentiment, sentiment_conf_penalty
+
+def classify_sentiment_impact(trades_df: pd.DataFrame) -> pd.DataFrame:
+    df = trades_df.copy()
+
+    # Identify BUY trades
+    df = df[df["action"] == "BUY"].copy()
+
+    # Trade blocked by sentiment if:
+    # buy_conf >= dynamic_thr BUT < adjusted_thr
+    df["blocked_by_sentiment"] = (
+        (df["buy_conf"] >= df["dynamic_thr"]) &
+        (df["buy_conf"] < df["adjusted_thr"])
+    )
+
+    return df
+
+def estimate_blocked_trade_cost(trades_df: pd.DataFrame) -> pd.DataFrame:
+    buys = classify_sentiment_impact(trades_df)
+
+    # Find corresponding SELLs
+    sells = trades_df[trades_df["action"].str.contains("SELL")].copy()
+
+    trade_pairs = []
+    for _, buy in buys.iterrows():
+        sell = sells[sells["timestamp"] > buy["timestamp"]].head(1)
+        if sell.empty:
+            continue
+
+        trade_pairs.append({
+            "timestamp": buy["timestamp"],
+            "blocked_by_sentiment": buy["blocked_by_sentiment"],
+            "btc_fng": buy["btc_sentiment"],
+            "expected_pnl": sell.iloc[0]["pnl"]
+        })
+
+    return pd.DataFrame(trade_pairs)
+
+def summarize_sentiment_impact(trade_impact_df: pd.DataFrame):
+    summary = {}
+
+    blocked = trade_impact_df[trade_impact_df["blocked_by_sentiment"]]
+    allowed = trade_impact_df[~trade_impact_df["blocked_by_sentiment"]]
+
+    summary["blocked_trades"] = len(blocked)
+    summary["allowed_trades"] = len(allowed)
+
+    summary["blocked_total_pnl"] = blocked["expected_pnl"].sum()
+    summary["allowed_total_pnl"] = allowed["expected_pnl"].sum()
+
+    summary["blocked_avg_pnl"] = blocked["expected_pnl"].mean()
+    summary["allowed_avg_pnl"] = allowed["expected_pnl"].mean()
+
+    summary["sentiment_net_harm"] = summary["blocked_total_pnl"] < 0
+
+    return summary
+
+def analyze_fng_ranges(trade_impact_df: pd.DataFrame) -> pd.DataFrame:
+    df = trade_impact_df.copy()
+
+    bins = [0, 10, 25, 40, 55, 70, 85, 100]
+    labels = [
+        "Extreme Fear",
+        "High Fear",
+        "Fear",
+        "Neutral",
+        "Greed",
+        "High Greed",
+        "Extreme Greed"
+    ]
+
+    df["fng_bucket"] = pd.cut(df["btc_fng"], bins=bins, labels=labels)
+
+    agg = df.groupby("fng_bucket").agg(
+        blocked_trades=("blocked_by_sentiment", "sum"),
+        avg_blocked_pnl=("expected_pnl", "mean"),
+        total_blocked_pnl=("expected_pnl", "sum")
+    ).reset_index()
+
+    return agg.sort_values("total_blocked_pnl")
+
 
 def backtest_with_trade_log_and_accuracy(df, model, feature_cols,
                                          start_equity=1000.0,
@@ -53,6 +134,22 @@ def backtest_with_trade_log_and_accuracy(df, model, feature_cols,
     df = df.dropna(subset=["true_signal"]).reset_index(drop=True)
     accuracy = (df["pred_signal"] == df["true_signal"]).mean()
 
+    # ---- BTC sentiment (2 years max) ----
+    try:
+        df_sent = fetch_historical_btc_sentiment(days=730)
+
+        df = pd.merge_asof(
+            df.sort_values("timestamp"),
+            df_sent,
+            on="timestamp",
+            direction="backward"
+        )
+
+    except Exception as e:
+        print(f"⚠️ BTC sentiment unavailable, defaulting to NEUTRAL ({e})")
+        df["btc_sentiment"] = 50  # neutral
+
+
     # Trading sim (long-only gating)
     equity = start_equity
     position = 0.0
@@ -73,10 +170,20 @@ def backtest_with_trade_log_and_accuracy(df, model, feature_cols,
         # compute dynamic buy threshold (only relevant to LONG buys)
         dynamic_thr = _dynamic_buy_threshold(atr_pct)
 
+        # adjust threshold based on sentiment
+        fng = int(row["fng"]) if not np.isnan(row["fng"]) else 50
+        sentiment_penalty = sentiment_conf_penalty(fng)
+        adjusted_thr = dynamic_thr + sentiment_penalty
+        adjusted_thr = min(max(adjusted_thr, 0.0), 0.95)
+
         # BUY logic (only when flat)
-        if raw_signal == 1 and position == 0:
-            # require ATR to be non-zero and buy_conf >= dynamic threshold
-            if buy_conf >= dynamic_thr and atr_pct >= 0.0:
+        if (
+            raw_signal == 1
+            and position == 0
+        ):
+
+            # require ATR to be non-zero and buy_conf >= adjusted threshold
+            if buy_conf >= adjusted_thr and atr_pct >= 0.0:
                 cash_after_fee = equity * (1 - trade_fee)
                 position = cash_after_fee / price
                 entry_price = price
@@ -90,7 +197,10 @@ def backtest_with_trade_log_and_accuracy(df, model, feature_cols,
                     "equity_after_fee": cash_after_fee,
                     "buy_conf": buy_conf,
                     "atr_pct": atr_pct,
-                    "dynamic_thr": dynamic_thr
+                    "dynamic_thr": dynamic_thr,
+                    "adjusted_thr": adjusted_thr,
+                    "sentiment_penalty": sentiment_penalty,
+                    "btc_sentiment": fng
                 })
 
         # If we hold a position, check forced-exit and other sells
@@ -108,7 +218,8 @@ def backtest_with_trade_log_and_accuracy(df, model, feature_cols,
                     "entry_price": entry_price,
                     "gain": gain,
                     "pnl": pnl,
-                    "atr_pct": atr_pct
+                    "atr_pct": atr_pct,
+                    "btc_sentiment": fng
                 })
                 equity = proceeds
                 position = 0.0
@@ -133,7 +244,8 @@ def backtest_with_trade_log_and_accuracy(df, model, feature_cols,
                     "price": price,
                     "entry_price": entry_price,
                     "gain": gain,
-                    "pnl": pnl
+                    "pnl": pnl,
+                    "btc_sentiment": fng
                 })
                 equity = proceeds
                 position = 0.0
@@ -151,7 +263,8 @@ def backtest_with_trade_log_and_accuracy(df, model, feature_cols,
                     "price": price,
                     "entry_price": entry_price,
                     "gain": gain,
-                    "pnl": pnl
+                    "pnl": pnl,
+                    "btc_sentiment": fng
                 })
                 equity = proceeds
                 position = 0.0
@@ -169,7 +282,8 @@ def backtest_with_trade_log_and_accuracy(df, model, feature_cols,
                     "price": price,
                     "entry_price": entry_price,
                     "gain": gain,
-                    "pnl": pnl
+                    "pnl": pnl,
+                    "btc_sentiment": fng
                 })
                 equity = proceeds
                 position = 0.0
@@ -199,5 +313,16 @@ def backtest_with_trade_log_and_accuracy(df, model, feature_cols,
     else:
         win_rate = 0.0
         winning_trades_df = pd.DataFrame()
+
+    trade_impact = estimate_blocked_trade_cost(trades_df)
+
+    summary = summarize_sentiment_impact(trade_impact)
+    print("=== SENTIMENT IMPACT SUMMARY ===")
+    for k, v in summary.items():
+        print(f"{k}: {v}")
+
+    fng_analysis = analyze_fng_ranges(trade_impact)
+    print("\n=== FNG RANGE IMPACT ===")
+    print(fng_analysis)
 
     return df, final_equity, trades_df, accuracy, winning_trades_df, win_rate

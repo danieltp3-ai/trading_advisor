@@ -88,7 +88,7 @@ def train_or_load_model(feature_cols=None, retrain=False):
         model = RandomForestClassifier(n_estimators=200, max_depth=8, random_state=42)
 
     model.fit(X_train, y_train)
-    joblib.dump(model, MODEL_PATH)
+    joblib.dump(model, MODEL_PATH, protocol=4)
     print(f"💾 Model saved → {MODEL_PATH}")
 
     train_acc = model.score(X_train, y_train)
